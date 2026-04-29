@@ -1,0 +1,85 @@
+// prisma/schema.prisma
+// LinkRevive Database Schema - Production Ready
+// Senior Engineer Notes: 
+// - Uses cuid for IDs (collision resistant, URL safe)
+// - jsonb for flexible fullResult to avoid over-normalization for complex AI outputs
+// - Indexes for fast lookups on URL and recency (common query patterns)
+// - Soft deletes not needed; use TTL on Redis for temp data
+// - Relations for history per user (future auth)
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String?  @unique
+  apiKey    String   @unique @default(cuid()) // For extension auth
+  plan      String   @default("free") // free | pro
+  createdAt DateTime @default(now())
+  analyses  LinkAnalysis[]
+  bulkScans BulkScan[]
+}
+
+model LinkAnalysis {
+  id            String    @id @default(cuid())
+  url           String    @db.VarChar(2048)
+  normalizedUrl String    // For dedup (strip query, trailing /)
+  status        String    // 'healthy' | 'broken' | 'redirected'
+  httpStatus    Int?
+  errorType     String?   // '404' | '410' | 'timeout' | 'dns' | 'ssl' | 'other'
+  linkType      String    // 'documentation' | 'blog' | 'github_repo' | 'pdf' | 'tutorial' | 'other'
+  analyzedAt    DateTime  @default(now())
+  fullResult    Json      // Full structured response: archive, alts, explanation, scores
+  userId        String?
+  user          User?     @relation(fields: [userId], references: [id])
+  snapshots     Snapshot[]
+  alternatives  Alternative[]
+
+  @@index([normalizedUrl, analyzedAt(sort: Desc)])
+  @@index([userId, analyzedAt(sort: Desc)])
+}
+
+model Snapshot {
+  id          String   @id @default(cuid())
+  analysisId  String
+  analysis    LinkAnalysis @relation(fields: [analysisId], references: [id], onDelete: Cascade)
+  timestamp   String   // Wayback format YYYYMMDDHHMMSS
+  waybackUrl  String
+  title       String?
+  summary     String?  @db.Text
+  createdAt   DateTime @default(now())
+}
+
+model Alternative {
+  id            String   @id @default(cuid())
+  analysisId    String
+  analysis      LinkAnalysis @relation(fields: [analysisId], references: [id], onDelete: Cascade)
+  title         String
+  url           String   @db.VarChar(2048)
+  source        String   // 'github' | 'google_cse' | 'manual'
+  relevanceScore Float   // 0-1 from LLM or heuristic
+  summary       String?  @db.Text
+  isRecommended Boolean  @default(false)
+  createdAt     DateTime @default(now())
+}
+
+model BulkScan {
+  id              String   @id @default(cuid())
+  pageUrl         String   @db.VarChar(2048)
+  status          String   // 'pending' | 'processing' | 'completed' | 'failed'
+  brokenCount     Int      @default(0)
+  totalLinks      Int      @default(0)
+  report          Json?    // { brokenLinks: [...], healthy: [...] }
+  userId          String?
+  user            User?    @relation(fields: [userId], references: [id])
+  createdAt       DateTime @default(now())
+  completedAt     DateTime?
+
+  @@index([userId, createdAt(sort: Desc)])
+}

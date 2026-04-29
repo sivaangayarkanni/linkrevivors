@@ -1,0 +1,13 @@
+// This is the main Prisma schema (copied from root for the API service)
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Import the full schema from root
+// In production we use a single source of truth at root prisma/schema.prisma
+// For Docker convenience, we duplicate here with symlink in real setups.
