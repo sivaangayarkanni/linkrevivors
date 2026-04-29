@@ -1,0 +1,13 @@
+# ================================================
+# RAILWAY ENVIRONMENT VARIABLES - COPY & PASTE
+# ================================================
+# Paste these into Railway → Your Backend Service → Variables
+
+OPENAI_API_KEY=sk-...                    # ← Replace with your real OpenAI key
+GOOGLE_CSE_API_KEY=AIza...               # ← Replace with your Google API key
+GOOGLE_CSE_CX=your-cx-id                 # ← Replace with your Custom Search Engine ID
+PORT=3001
+
+# Railway will automatically provide these two:
+# DATABASE_URL=postgresql://...
+# REDIS_URL=redis://...

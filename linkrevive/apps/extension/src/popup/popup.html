@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>LinkRevive</title>
+  <style>
+    body { width: 320px; padding: 16px; font-family: system-ui, -apple-system, sans-serif; background: #0f172a; color: white; margin: 0; }
+    .header { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
+    .logo { width: 32px; height: 32px; background: #3b82f6; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+    h1 { margin: 0; font-size: 18px; font-weight: 600; }
+    .btn { width: 100%; padding: 12px; background: #3b82f6; color: white; border: none; border-radius: 10px; font-weight: 600; cursor: pointer; margin-top: 8px; }
+    .btn:hover { background: #2563eb; }
+    .status { font-size: 12px; color: #64748b; margin-top: 12px; text-align: center; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="logo">🔗</div>
+    <h1>LinkRevive</h1>
+  </div>
+
+  <p style="margin: 0 0 16px; font-size: 13px; color: #94a3b8; line-height: 1.4;">
+    Instantly revive broken links on the current page.
+  </p>
+
+  <button id="analyze-btn" class="btn">Analyze Current Page</button>
+  <button id="bulk-btn" class="btn" style="background: #475569;">Bulk Scan Current Site</button>
+
+  <div class="status" id="status">Ready • v1.0.0</div>
+
+  <script src="popup.ts"></script>
+</body>
+</html>
